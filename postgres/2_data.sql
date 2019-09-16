@@ -1,4 +1,4 @@
-insert into hierarchy (path) values ('1');
-insert into hierarchy (path) values ('1.2');
-insert into hierarchy (path) values ('1.3');
-insert into hierarchy (path) values ('1.2.4');
+insert into hierarchy (parent_id) values (NULL);
+insert into hierarchy (parent_id) values (1);
+insert into hierarchy (parent_id) values (1);
+insert into hierarchy (parent_id) values (2);

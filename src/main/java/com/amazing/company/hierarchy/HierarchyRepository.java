@@ -13,31 +13,54 @@ import java.util.List;
 public interface HierarchyRepository extends PagingAndSortingRepository<Node, Long> {
 
     @Query(
-            value = "SELECT " +
-                        "id, " +
-                        "nlevel(path) - 1 AS height, " +
-                        "subltree(path, 0, 1) AS root_id, " +
-                        "subpath(path, -2, 1) AS parent_id " +
+            value = "WITH RECURSIVE descendants AS (" +
+                    "       SELECT id, parent_id FROM hierarchy WHERE id = :parentId" +
+                    "   UNION " +
+                    "       SELECT ancestor.id, ancestor.parent_id " +
+                    "       FROM hierarchy ancestor INNER JOIN descendants d " +
+                    "           ON d.parent_id = ancestor.id" +
+                    ")" +
+                    "SELECT " +
+                    "   id, " +
+                    "   parent_id, " +
+                    "   (SELECT id FROM hierarchy WHERE parent_id IS NULL) as root_id, " +
+                    "   (SELECT COUNT(*) FROM descendants) as height " +
                     "FROM Hierarchy " +
-                    // Match all paths that includes the parentId
-                    // followed by exactly one label.
-                    "WHERE path ~ CAST(concat('*.', :parentId, '.*{1}') AS lquery)",
+                    "WHERE parent_id = :parentId",
             nativeQuery = true
     )
     List<Node> getChildren(@Param("parentId") Long parentId);
 
-    @Modifying
-    @Transactional
     @Query(
-            value = "WITH " +
-                        "parent(path) AS" +
-                        "(SELECT path FROM hierarchy WHERE id = :parentId)," +
-                        "node(path) AS" +
-                        "(SELECT path FROM hierarchy WHERE id = :nodeId)" +
+            value = "WITH RECURSIVE ancestor AS (" +
+                    "       SELECT id, parent_id FROM hierarchy WHERE id = :parentId " +
+                    "   UNION " +
+                    "       SELECT descendant.id, descendant.parent_id " +
+                    "       FROM hierarchy descendant INNER JOIN ancestor a " +
+                    "           ON a.parent_id = descendant.id" +
+                    ") " +
                     "UPDATE hierarchy " +
-                    "SET path = (SELECT path FROM parent) || subpath(path, nlevel((SELECT path FROM node)) - 1) " +
-                    "WHERE path <@ (SELECT path FROM node)",
+                    "SET parent_id = (SELECT parent_id FROM hierarchy WHERE id = :id) " +
+                    "WHERE id = (SELECT id FROM ancestor WHERE parent_id = :id) ;" +
+                    "UPDATE hierarchy " +
+                    "SET parent_id = :parentId " +
+                    "WHERE id = :id",
             nativeQuery = true
     )
-    void changeParent(@Param("nodeId") Long nodeId, @Param("parentId") Long parentId);
+    @Modifying
+    @Transactional
+    void changeParent(@Param("id") Long id, @Param("parentId") Long parentId);
+
+    @Query(
+            value = "UPDATE hierarchy " +
+                    "SET parent_id = :id " +
+                    "WHERE id = (SELECT id FROM hierarchy WHERE parent_id IS NULL) ;" +
+                    "UPDATE hierarchy " +
+                    "SET parent_id = NULL " +
+                    "WHERE id = :id",
+            nativeQuery = true
+    )
+    @Modifying
+    @Transactional
+    void makeRoot(@Param("id") Long id);
 }
