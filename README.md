@@ -30,8 +30,30 @@ The challenge:
 
 The system allows modifications for all nodes in the tree. 
 
-However, changing the parent of a node to one in its subtree currently results in a incorrect state, 
-which is of course not desirable.  
+A modification where the parent of a node is changed to one in the nodes subtree follows a hierarchical approach, so
+that a promotion is given to the node which is both a child of the modified node and an ancestor of the new parent.
+
+This is best illustrated with an example. Given the following tree.
+    
+          1  
+         / \
+        2   3  
+       / \
+      5   4  
+     /
+    6 
+    
+Changing the parent of 2 from 1 to 6 will result in the following tree.
+
+            1  
+           / \
+          5   3  
+         /
+        6  
+       /
+      2
+     / 
+    4  
 
 ### Building and running the system
 
