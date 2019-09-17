@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class HierarchyControllerTest {
 
     private HierarchyController hierarchyController;
-    
+
     @Mock
     private HierarchyRepository hierarchyRepository;
 

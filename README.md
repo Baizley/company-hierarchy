@@ -46,7 +46,6 @@ Then to run it use:
 ### Further Tasks to Complete the System
 
 There is still a few tasks that could improve the solution, which are listed here:
-1) Introduce error handling (do not leak stacktrace, ensure nodes exists before changing parent, etc.).
-2) Add REST API with Swagger.
-3) Setup integration testing with Postgres
-4) Performance test the application.
+1) Add REST API with Swagger.
+2) Setup integration testing with Postgres
+3) Performance test the application.
