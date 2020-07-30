@@ -1,7 +1,18 @@
-FROM openjdk:8-jdk-alpine
+FROM maven:3.6-jdk-14 AS builder
 
-COPY ./target/company-hierarchy-0.0.1-SNAPSHOT.jar /usr/app/
+WORKDIR build/
+
+COPY pom.xml ./
+COPY ./src ./src
+
+RUN ["mvn", "clean", "package", "spring-boot:repackage"]
+
+RUN ls
+
+FROM openjdk:14-alpine
+
 WORKDIR /usr/app/
-RUN sh -c 'touch company-hierarchy-0.0.1-SNAPSHOT.jar'
 
-ENTRYPOINT ["java", "-jar", "company-hierarchy-0.0.1-SNAPSHOT.jar"]
+COPY --from=builder /build/target/*.jar ./app.jar
+
+CMD ["java", "--enable-preview", "-jar", "app.jar"]

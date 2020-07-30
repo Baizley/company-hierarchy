@@ -1,7 +1,8 @@
 package com.amazing.company.hierarchy;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -22,7 +23,7 @@ public class HierarchyControllerTest {
     @Mock
     private HierarchyRepository hierarchyRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         hierarchyController = new HierarchyController(hierarchyRepository);
@@ -30,7 +31,7 @@ public class HierarchyControllerTest {
 
     @Test
     public void shouldNotBeAbleToGetChildrenForANodeThatDoesNotExists() {
-        ResponseEntity<List<Node>> response = hierarchyController.getChildren(5l);
+        ResponseEntity<List<Node>> response = hierarchyController.getChildren(5L);
 
         assertEquals(ResponseEntity.notFound().build(), response,
                 "Should receive a not found response entity");
@@ -39,8 +40,8 @@ public class HierarchyControllerTest {
     @Test
     public void shouldNotBeAbleToPutANodeThatDoesNotExists() {
         Node node = new Node();
-        node.setId(5l);
-        node.setParentId(1l);
+        node.setId(5L);
+        node.setParentId(1L);
 
         ResponseEntity<String> response = hierarchyController.putNode(node);
 
@@ -51,8 +52,8 @@ public class HierarchyControllerTest {
     @Test
     public void shouldRejectMakingNodeItsOwnParent() {
         Node node = new Node();
-        node.setId(1l);
-        node.setParentId(1l);
+        node.setId(1L);
+        node.setParentId(1L);
         ResponseEntity<String> response = hierarchyController.putNode(node);
 
         ResponseEntity<String> expectedResponse = ResponseEntity.badRequest().body("Parent ID of a node can not be its own ID.");
